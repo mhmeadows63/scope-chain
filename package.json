@@ -1,0 +1,25 @@
+{
+  "name": "scope-chain",
+  "version": "1.0.0",
+  "description": "Another asynchronous function chain wrapper offering both middleware and non-middleware uses",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mhmeadows63/scope-chain.git"
+  },
+  "keywords": [
+    "scope",
+    "chain",
+    "middleware",
+    "trycatch"
+  ],
+  "author": "Martin Meadows <martin@netconfigs.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mhmeadows63/scope-chain/issues"
+  },
+  "homepage": "https://github.com/mhmeadows63/scope-chain#readme"
+}
