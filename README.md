@@ -37,7 +37,7 @@ $ npm install scope-chain
 
 ## Philosophy
 
-Programming a multi-step activity in an asynchronous NodeJS architecture can 
+Programming a multi-step activity in the asynchronous NodeJS architecture can 
 lead to a staircase of in-line functions as in this contrived example.
 
 ```js
@@ -73,17 +73,21 @@ function middleware(req, res, next) {
 
 ## Detail
 
+The `chain` function has this fingerprint `chain(final, step, step, step, ...)`
+
 The 1st argument to `chain` is the _final_ function having a fingerprint of 
 `function (err, args, ...)` and it is always called last.  In a middleware 
 usage, the middleware-next argument is usually supplied here.
 
-The 2nd and subsequent arguments to `chain` are the asynchronous steps of the
-activity. When called, each function is wrapped in its own try/catch where all 
-exceptions are caught and sent to the _final_ function, aborting all subsequent 
-steps. For each of the 2nd and subsequent functions `this` is a function-object 
-for use as the inner next for each step function.
+The 2nd and subsequent arguments to `chain` are the sequential asynchronous 
+steps of the activity. When called, each function is wrapped in its own 
+try/catch where all exceptions are caught and sent to the _final_ function, 
+aborting all subsequent steps. For each of the 2nd and subsequent functions 
+`this` is a function-object to be used as the inner-next for each step 
+function.
 
-The `this` object provides four variants having the following fingerprints:
+The `this` object provides four variants of the inner-next functionality having 
+the following fingerprints:
 
 ### `this(err, arg1, arg2, arg3, ...)`
 
@@ -99,7 +103,7 @@ When `this.silent()` is called with a falsy err value, the subsequent step
 function is called with just the available `argN` arguments.
 
 When called with a truthy err value, the _final_ function is called with no 
-arguments so discarding the error and aborting the step sequence.
+arguments so discarding the error but also aborting the step sequence.
 
 ### `this.ignore(err, arg1, arg2, arg3, ...)`
 
@@ -111,29 +115,36 @@ step function is called with just the available `argN` arguments.
 
 ### `this.noerror(arg1, arg2, arg3, ...)`
 
-As `this.noerror()` has any concept of an err arguments, the subsequent step 
+As `this.noerror()` has no concept of an err argument, the subsequent step 
 function is called with all the available `argN` arguments. Arg1 may be an err
 value, but the `chain` functionality is ignorant of this.
 
 ## Attribute Copying
 
-Any attributes on the found on the _final_ function are copied to each of the 
-four variant inner-next functions, but NOT copied back on completion. This can 
+Any attributes found on the _final_ function are copied to each of the four 
+variant inner-next functions, but NOT copied back on completion. This can 
 useful is passing context to private implementations of asynchronous logic.
 
-The author has used this in an ExpressJS application to attach a unique index to
-each `req` object so that log-lines from interleaved request processing can be 
-attributed to the original request that triggered the operation.
+The author used attribute-copying in an ExpressJS application to attach a 
+unique index to each `req` object so that log-lines from interleaved requests 
+could be attributed to the original ExpressJS request.
 
 ```
-app.use(function (req, res, next) { req.index = ++global.index; next() })
+app.use(function (req, res, next) {
+    req.index = ++global.index; next();
+});
 app.get('/', function (req, res, next) {
     next.index = req.index;
     chain(next, function () {
-        mysql(sql, this); // any logging from mysql can include the index
+        mysql(sql, this);
     }, function (rows, cols) {
         ...
     });
+});
+
+function mysql(sql, callback) { // cb(err, rows, cols)
+    debug(callback.index, sql, ...);
+    ...
 }
 ```
 
