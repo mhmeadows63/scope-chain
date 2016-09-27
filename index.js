@@ -1,5 +1,5 @@
 module.exports = function chain(next/*, task, task, ...*/) {
-    var next = next || function (err) { err && console.error(err) };
+    var next = next || function (err) { err && console.error(err.stack || err) };
     var tasks = Array.prototype.slice.call(arguments, 1);
     var funcs = [
         // function that considers the 1st argument as a potential error to forward
