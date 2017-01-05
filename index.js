@@ -41,8 +41,9 @@ module.exports = function chain(next/*, task, task, ...*/) {
     
     // copy any properties on the 'next' function to the all functions
     funcs.forEach(function (func, i, a) {
-        for (var key in next) func[key] = next[key];
-        if (i) this[func.name] = func;
+        for (var key in next) func[key] = next[key]; // copy next.* to each func
+        if (i) this[func.name] = func; // copy silent, ignore, noerror to done
+        else this.this = next; // copy next to done.this
     }, funcs[0]);
     
     try { tasks.length ? tasks.shift().apply(funcs[0]) : next() } // invoke the 1st task with zero-arguments
